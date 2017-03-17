@@ -22,7 +22,7 @@ def load_trie():
         curr.word = True   # end of the word
     return head
 
-def search(head, board, lengths):
+def search(head, board, lengths, num_wds):
     lengths = sorted(lengths, reverse=True)  # look for longest length first
     n = len(board)  # assume square dimensions for now
     for i in range(n):
@@ -33,18 +33,18 @@ def search(head, board, lengths):
                 word = [(chr(val + 97), i, j)]
                 visited[i][j] = 1
                 if val in head.child:
-                    search_rec(head, head.child[val], board, i, j, visited, word, lengths)
+                    search_rec(head, head.child[val], board, i, j, visited, word, lengths, num_wds)
 
-def search_rec(head, curr, board, i, j, visited, word, lengths):
+def search_rec(head, curr, board, i, j, visited, word, lengths, num_wds):
     if len(word) == lengths[0]:
         if curr.word == True:
-            print "     "*(len(lengths)-1) + "Found a word! It's %s"%(''.join([c[0] for c in word]).upper())
-            pretty_print_word(word, len(board), len(lengths)-1)
+            print "     "*(num_wds - len(lengths)) + "Found a word! It's %s"%(''.join([c[0] for c in word]).upper())
+            pretty_print_word(word, len(board), num_wds - len(lengths))
             new_board = update_board(board, word)
             if len(lengths) > 1:
-                search(head, new_board, lengths[1:])
+                search(head, new_board, lengths[1:], num_wds)
             else:
-                print "Found a potential solution!"
+                print "     "*(num_wds - 1) + "Found a potential solution!"
             return
     for di in [-1, 0, 1]:
         for dj in [-1, 0, 1]:
@@ -58,7 +58,7 @@ def search_rec(head, curr, board, i, j, visited, word, lengths):
                     if val in curr.child:   
                         word += [(chr(val + 97), i+di, j+dj)]
                         visited[i+di][j+dj] = 1
-                        search_rec(head, curr.child[val], board, i+di, j+dj, visited, word, lengths)
+                        search_rec(head, curr.child[val], board, i+di, j+dj, visited, word, lengths, num_wds)
                         visited[i+di][j+dj] = 0
                         word.pop()
                 except IndexError:  # at the edge, can't move in that direction
@@ -100,7 +100,8 @@ def main():
         board.append([ord(c) - ord('a') for c in line.split(' ')])
     board = np.array(board)
 
-    search(head, board, [int(length) for length in sys.argv[1:]])
+    lengths = [int(length) for length in sys.argv[1:]]
+    search(head, board, lengths, len(lengths))
 
 
 ## TESTING FUNCTIONS ##
