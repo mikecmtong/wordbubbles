@@ -84,21 +84,14 @@ def pretty_print_word(word, n, depth):
         sys.stdout.write("\n")
 
 def main():
-    '''USAGE:
-    Give board through stdin, using ` as the empty -1 symbol
-    e.g.  f `\\n
-          u n\\n
-          EOF
-    is the first level of wordbubbles.
-    Give length of desired word through argv'''
     if len(sys.argv) < 2:
         print '''        usage:
-        give board through stdin, using ` as the empty -1 symbol
+        - give board through stdin, using ` as the empty -1 symbol
         e.g.  f `\\n
               u n\\n
               EOF
         is the first level of wordbubbles.
-        give length of desired word through the first command line argument'''
+        - give length of desired word through the first command line argument'''
         return 1
     head = load_trie()
     board = []
