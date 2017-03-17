@@ -57,10 +57,14 @@ def search_rec(curr, board, i, j, visited, word, length):
                 except IndexError:  # at the edge, can't move in that direction
                     continue
 
-
 def main():
-    if len(sys.argv) != 2:
-        print "Usage: python wordbubbles.py <length_of_word>\nInput the board through stdin"
+    '''USAGE:
+    Give board through stdin, using ` as the empty -1 symbol
+    e.g.  f `\\n
+          u n\\n
+          EOF
+    is the first level of wordbubbles.
+    Give length of desired word through argv'''
     head = load_trie()
     board = []
     for line in sys.stdin:
@@ -69,15 +73,8 @@ def main():
     board = np.array(board)
     print board
 
-    # USAGE:
-    # Give board through stdin, using ` as the empty -1 symbol
-    # e.g.  f `\n
-    #       u n\n
-    #       EOF
-    # is the first level of wordbubbles.
-    # Give length of desired word through argv
-
-    search(head, board, int(sys.argv[1]))
+    for length in sys.argv[1:]:
+        search(head, board, int(length))
 
     #pretty_print_trie(head)
     #for word in ["amok"]:
