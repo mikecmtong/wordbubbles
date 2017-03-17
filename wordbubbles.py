@@ -22,23 +22,29 @@ def load_trie():
         curr.word = True   # end of the word
     return head
 
-def search(head, board, length):
+def search(head, board, lengths):
+    lengths = sorted(lengths, reverse=True)  # look for longest length first
     n = len(board)  # assume square dimensions for now
     for i in range(n):
         for j in range(n):   # row then column
             visited = np.zeros([n, n])
-            if board[i][j] != -1:
+            if board[i][j] != -1 and visited[i][j] != 1:
                 val = board[i][j]
                 word = [(chr(val + 97), i, j)]
                 visited[i][j] = 1
                 if val in head.child:
-                    search_rec(head.child[val], board, i, j, visited, word, length)
+                    search_rec(head, head.child[val], board, i, j, visited, word, lengths)
 
-def search_rec(curr, board, i, j, visited, word, length):
-    if len(word) == length:
+def search_rec(head, curr, board, i, j, visited, word, lengths):
+    if len(word) == lengths[0]:
         if curr.word == True:
-            print "Found a word! It's %s"%(''.join([c[0] for c in word]).upper())
-            pretty_print_word(word, len(board))
+            print "     "*(len(lengths)-1) + "Found a word! It's %s"%(''.join([c[0] for c in word]).upper())
+            pretty_print_word(word, len(board), len(lengths)-1)
+            new_board = update_board(board, word)
+            if len(lengths) > 1:
+                search(head, new_board, lengths[1:])
+            else:
+                print "Found a potential solution!"
             return
     for di in [-1, 0, 1]:
         for dj in [-1, 0, 1]:
@@ -52,11 +58,30 @@ def search_rec(curr, board, i, j, visited, word, length):
                     if val in curr.child:   
                         word += [(chr(val + 97), i+di, j+dj)]
                         visited[i+di][j+dj] = 1
-                        search_rec(curr.child[val], board, i+di, j+dj, visited, word, length)
+                        search_rec(head, curr.child[val], board, i+di, j+dj, visited, word, lengths)
                         visited[i+di][j+dj] = 0
                         word.pop()
                 except IndexError:  # at the edge, can't move in that direction
                     continue
+
+def update_board(board, word):
+    new_board = np.copy(board)
+    for tup in word:
+        new_board[tup[1]][tup[2]] = -1
+    return new_board
+
+def pretty_print_word(word, n, depth):
+    '''prints a found word with the geometry of its actual position in the board
+    n: n x n board'''
+    pretty_word = np.full([n, n], -1)
+    for tup in word:
+        pretty_word[tup[1]][tup[2]] = ord(tup[0]) - 97
+
+    for row in pretty_word:
+        sys.stdout.write("     "*depth)
+        for elem in row:
+            sys.stdout.write("%s "%(chr(int(elem) + 97).upper()))
+        sys.stdout.write("\n")
 
 def main():
     '''USAGE:
@@ -74,24 +99,8 @@ def main():
     board = np.array(board)
     print board
 
-    for length in sys.argv[1:]:  # maybe integrate this into the actual program, for efficiency? 
-        search(head, board, int(length))
+    search(head, board, [int(length) for length in sys.argv[1:]])
 
-def pretty_print_word(word, n):
-    '''prints a found word with the geometry of its actual position in the board
-    n: n x n board'''
-    pretty_word = np.full([n, n], -1)
-    for tup in word:
-        pretty_word[tup[1]][tup[2]] = ord(tup[0]) - 97
-
-    for row in pretty_word:
-        for elem in row:
-            sys.stdout.write("%s "%(chr(int(elem) + 97).upper()))
-        sys.stdout.write("\n")
-
-    #pretty_print_trie(head)
-    #for word in ["amok"]:
-    #    is_a_word(head, word)
 
 ## TESTING FUNCTIONS ##
 
