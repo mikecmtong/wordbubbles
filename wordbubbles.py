@@ -22,7 +22,7 @@ def load_trie():
         curr.word = True   # end of the word
     return head
 
-def search(head, board, lengths, num_wds):
+def search(head, board, lengths, words_found, num_wds):
     lengths = sorted(lengths, reverse=True)  # look for longest length first
     n = len(board)  # assume square dimensions for now
     for i in range(n):
@@ -30,21 +30,23 @@ def search(head, board, lengths, num_wds):
             visited = np.zeros([n, n])
             if board[i][j] != -1 and visited[i][j] != 1:
                 val = board[i][j]
-                word = [(chr(val + 97), i, j)]
+                words = words_found + [[(chr(val + 97), i, j)]]
                 visited[i][j] = 1
                 if val in head.child:
-                    search_rec(head, head.child[val], board, i, j, visited, word, lengths, num_wds)
+                    search_rec(head, head.child[val], board, i, j, visited, words, lengths, num_wds)
 
-def search_rec(head, curr, board, i, j, visited, word, lengths, num_wds):
+def search_rec(head, curr, board, i, j, visited, words, lengths, num_wds):
+    word = words[-1]
     if len(word) == lengths[0]:
         if curr.word == True:
-            print "     "*(num_wds - len(lengths)) + "Found a word! It's %s"%(''.join([c[0] for c in word]).upper())
-            pretty_print_word(word, len(board), num_wds - len(lengths))
             new_board = update_board(board, word)
             if len(lengths) > 1:
-                search(head, new_board, lengths[1:], num_wds)
+                search(head, new_board, lengths[1:], words, num_wds)
             else:
-                print "     "*(num_wds - 1) + "Found a potential solution!"
+                print "Found a potential solution!"
+                for found_word in words:
+                    print "%s\n"%''.join([c[0] for c in found_word]).upper()
+                    pretty_print_word(found_word, len(board))
             return
     for di in [-1, 0, 1]:
         for dj in [-1, 0, 1]:
@@ -58,7 +60,7 @@ def search_rec(head, curr, board, i, j, visited, word, lengths, num_wds):
                     if val in curr.child:   
                         word += [(chr(val + 97), i+di, j+dj)]
                         visited[i+di][j+dj] = 1
-                        search_rec(head, curr.child[val], board, i+di, j+dj, visited, word, lengths, num_wds)
+                        search_rec(head, curr.child[val], board, i+di, j+dj, visited, words, lengths, num_wds)
                         visited[i+di][j+dj] = 0
                         word.pop()
                 except IndexError:  # at the edge, can't move in that direction
@@ -70,7 +72,7 @@ def update_board(board, word):
         new_board[tup[1]][tup[2]] = -1
     return new_board
 
-def pretty_print_word(word, n, depth):
+def pretty_print_word(word, n):
     '''prints a found word with the geometry of its actual position in the board
     n: n x n board'''
     pretty_word = np.full([n, n], -1)
@@ -78,7 +80,6 @@ def pretty_print_word(word, n, depth):
         pretty_word[tup[1]][tup[2]] = ord(tup[0]) - 97
 
     for row in pretty_word:
-        sys.stdout.write("     "*depth)
         for elem in row:
             sys.stdout.write("%s "%(chr(int(elem) + 97).upper()))
         sys.stdout.write("\n")
@@ -101,7 +102,7 @@ def main():
     board = np.array(board)
 
     lengths = [int(length) for length in sys.argv[1:]]
-    search(head, board, lengths, len(lengths))
+    search(head, board, lengths, [], len(lengths))
 
 
 ## TESTING FUNCTIONS ##
