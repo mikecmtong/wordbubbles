@@ -8,7 +8,7 @@ class TrieNode:
 
 def load_trie():
     s = ord('a')  # shift factor
-    dict_file = 'words.txt'
+    dict_file = 'words'
     
     f = open(dict_file, 'r')
     head = TrieNode()
@@ -106,7 +106,6 @@ def main():
         line = line.rstrip()
         board.append([ord(c) - ord('a') for c in line.split(' ')])
     board = np.array(board)
-    print board
 
     search(head, board, [int(length) for length in sys.argv[1:]])
 
