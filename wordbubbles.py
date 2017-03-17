@@ -45,8 +45,9 @@ def search_rec(head, curr, board, i, j, visited, words, lengths, num_wds):
             else:
                 print "Found a potential solution!"
                 for found_word in words:
-                    print "%s\n"%''.join([c[0] for c in found_word]).upper()
+                    print "%s"%''.join([c[0] for c in found_word]).upper()
                     pretty_print_word(found_word, len(board))
+                    sys.stdout.write("\n")
             return
     for di in [-1, 0, 1]:
         for dj in [-1, 0, 1]:
@@ -85,23 +86,23 @@ def pretty_print_word(word, n):
         sys.stdout.write("\n")
 
 def main():
-    if len(sys.argv) < 2:
+    if len(sys.argv) > 1:
         print '''        usage:
-        - give board through stdin, using ` as the empty -1 symbol
-        e.g.  f `\\n
-              u n\\n
+        - first specify length of words through stdin
+        - then give board through stdin, using ` as the empty -1 symbol
+        e.g.  3
+              f `
+              u n
               EOF
-        is the first level of wordbubbles.
-        - give length of desired word through the first command line argument'''
+        is the first level of wordbubbles.'''
         return 1
     head = load_trie()
+    lengths = [int(num) for num in sys.stdin.readline().strip().split(' ')]
     board = []
     for line in sys.stdin:
         line = line.rstrip()
         board.append([ord(c) - ord('a') for c in line.split(' ')])
     board = np.array(board)
-
-    lengths = [int(length) for length in sys.argv[1:]]
     search(head, board, lengths, [], len(lengths))
 
 
