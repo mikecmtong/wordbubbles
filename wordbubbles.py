@@ -29,7 +29,7 @@ def search(head, board, length):
             visited = np.zeros([n, n])
             if board[i][j] != -1:
                 val = board[i][j]
-                word = [chr(val + 97)]
+                word = [(chr(val + 97), i, j)]
                 visited[i][j] = 1
                 if val in head.child:
                     search_rec(head.child[val], board, i, j, visited, word, length)
@@ -37,7 +37,8 @@ def search(head, board, length):
 def search_rec(curr, board, i, j, visited, word, length):
     if len(word) == length:
         if curr.word == True:
-            print "Found a word! It's %s"%(''.join(word).upper())
+            print "Found a word! It's %s"%(''.join([c[0] for c in word]).upper())
+            pretty_print_word(word, len(board))
             return
     for di in [-1, 0, 1]:
         for dj in [-1, 0, 1]:
@@ -49,7 +50,7 @@ def search_rec(curr, board, i, j, visited, word, length):
                     val = board[i+di][j+dj]
                     # condition fails if this block is empty (-1) or leads to no possible words
                     if val in curr.child:   
-                        word += [chr(val + 97)]
+                        word += [(chr(val + 97), i+di, j+dj)]
                         visited[i+di][j+dj] = 1
                         search_rec(curr.child[val], board, i+di, j+dj, visited, word, length)
                         visited[i+di][j+dj] = 0
@@ -73,8 +74,20 @@ def main():
     board = np.array(board)
     print board
 
-    for length in sys.argv[1:]:
+    for length in sys.argv[1:]:  # maybe integrate this into the actual program, for efficiency? 
         search(head, board, int(length))
+
+def pretty_print_word(word, n):
+    '''prints a found word with the geometry of its actual position in the board
+    n: n x n board'''
+    pretty_word = np.full([n, n], -1)
+    for tup in word:
+        pretty_word[tup[1]][tup[2]] = ord(tup[0]) - 97
+
+    for row in pretty_word:
+        for elem in row:
+            sys.stdout.write("%s "%(chr(int(elem) + 97).upper()))
+        sys.stdout.write("\n")
 
     #pretty_print_trie(head)
     #for word in ["amok"]:
